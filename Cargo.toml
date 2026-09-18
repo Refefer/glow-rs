@@ -1,0 +1,28 @@
+[package]
+name = "glow-rs"
+version = "0.1.0"
+edition = "2024"
+description = "Render a markdown file in the terminal with less-style paging"
+
+[[bin]]
+name = "glow-rs"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+crossterm = "0.29"
+pulldown-cmark = { version = "0.13", default-features = false }
+ratatui = "0.30"
+synoptic = "2"
+unicode-segmentation = "1"
+unicode-width = "0.2"
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints.clippy]
+unwrap_used             = "deny"   # no `.unwrap()`; handle Option/Result or propagate with `?`
+expect_used             = "deny"   # `.expect()` is a labeled panic, still denied
+panic                   = "deny"   # no explicit `panic!()` in production code
+default_trait_access    = "warn"   # prefer T::default() over Default::default()
+mod_module_files        = "deny"   # Prefer Rust 2018 module roots: src/foo.rs
