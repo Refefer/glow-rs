@@ -549,6 +549,7 @@ dependencies = [
  "crossterm",
  "pulldown-cmark",
  "ratatui",
+ "regex",
  "synoptic",
  "tempfile",
  "unicode-segmentation",

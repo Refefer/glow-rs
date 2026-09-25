@@ -6,7 +6,9 @@
 //! the pager re-prints every link cell inside an OSC 8 open/close pair, and
 //! re-prints last frame's link cells that are no longer links so they lose
 //! theirs. Everything is re-printed from the frame buffer, so what the
-//! terminal shows never diverges from what ratatui thinks is there.
+//! terminal shows never diverges from what ratatui thinks is there. The
+//! cursor is put back where ratatui left it, so a visible cursor (the search
+//! prompt's) does not jump to the last link printed.
 //!
 //! Gotcha: this goes around ratatui's diff, which cannot notice a link change
 //! under an unchanged cell (two links with identical text at the same spot).
@@ -19,6 +21,8 @@ use std::io::{self, Write};
 use std::ops::Range;
 use std::rc::Rc;
 
+use crossterm::cursor::{RestorePosition, SavePosition};
+use crossterm::queue;
 use ratatui::backend::Backend;
 use ratatui::buffer::{Buffer, Cell};
 use ratatui::layout::Position;
@@ -108,6 +112,7 @@ impl Paint {
         if self.is_empty() {
             return Ok(());
         }
+        queue!(backend, SavePosition)?;
         for run in self.runs {
             if let Some(target) = &run.target {
                 let id = Rc::as_ptr(target).cast::<u8>() as usize;
@@ -118,6 +123,7 @@ impl Paint {
                 write!(backend, "\x1b]8;;\x1b\\")?;
             }
         }
+        queue!(backend, RestorePosition)?;
         Backend::flush(backend)
     }
 }
@@ -266,6 +272,10 @@ mod tests {
         let close = out.rfind("\x1b]8;;\x1b\\").expect("close sequence");
         let text = out.find("docs").expect("text");
         assert!(open < uri && uri < text && text < close, "{out:?}");
+        assert!(
+            out.starts_with("\x1b7") && out.ends_with("\x1b8"),
+            "cursor saved and restored around the paint: {out:?}"
+        );
     }
 
     #[test]

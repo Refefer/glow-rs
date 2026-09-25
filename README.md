@@ -46,11 +46,32 @@ Options:
 | Half page      | `J` / `K`, `d` / `u`, `^D` / `^U`             |
 | Full page      | `f` / `b`, `Space`, `PgDn` / `PgUp`, `^F` / `^B`, `^V` |
 | Top / bottom   | `g` / `G`, `<` / `>`, `Home` / `End`          |
+| Search forward / backward | `/pattern` / `?pattern`, then `Enter` |
+| Next / previous match | `n` / `N`                               |
 | Quit           | `q`, `Q`, `Esc`, `^C`                         |
 
 The bottom row works like `less`'s prompt: the file name on the first screen,
 `:` while paging, `(END)` when the last line is on screen, and `~` on rows
 past the end of the file.
+
+## Search
+
+- **Patterns** are regular expressions ([Rust `regex`
+  syntax](https://docs.rs/regex/latest/regex/#syntax)) and, as in `less`,
+  case-sensitive; start one with `(?i)` to ignore case.
+- **Moving.** `/` searches forward and `?` backward, starting past the top
+  line of the screen. The matching line moves to the top (or as near as the
+  end of the file allows) and every match on screen is shown in reverse video
+  until another pattern replaces it. `n` repeats the search in the direction
+  it was typed, `N` in the other one, and an empty pattern reuses the last
+  one. Search does not wrap around: past the last match you get
+  `Pattern not found`, which clears on the next key.
+- **What is matched** is the text as displayed — resolved link paths, table
+  borders and blockquote bars included — one screen line at a time, so a
+  phrase that wraps onto the next line is not found.
+- **Editing the pattern:** `←` / `→`, `Home` / `End`, `Backspace` /
+  `Delete`, `^U` to clear. `Esc` or `^C` cancels, as does `Backspace` on an
+  empty pattern.
 
 ## Building
 
@@ -72,4 +93,5 @@ The binary lands in the workspace `target-dir` set in `.cargo/config.toml`.
 | `src/links.rs`    | `LinkResolver`: relative destinations → `Destination` (display text + click URI) |
 | `src/document.rs` | `Document`/`DocLine`: rendered lines plus the link regions on each |
 | `src/hyperlinks.rs` | OSC 8 painter: re-prints link cells after each frame so the terminal makes them clickable |
-| `src/pager.rs`    | terminal ownership, key map, `Viewport` scroll math, resize/reflow |
+| `src/search.rs`   | `/` `?` search: pattern input editing, regex compile, next/previous matching line, match columns to highlight |
+| `src/pager.rs`    | terminal ownership, key map, `Viewport` scroll math, resize/reflow, search anchoring and highlighting |

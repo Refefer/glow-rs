@@ -15,6 +15,7 @@ mod hyperlinks;
 mod links;
 mod markdown;
 mod pager;
+mod search;
 mod wrap;
 
 use std::fmt;
@@ -38,7 +39,8 @@ const PIPED_WIDTH: usize = 80;
     version,
     about = "Render a markdown file in the terminal with less-style paging",
     after_help = "Keys: j/k/arrows line, J/K (d/u) half page, f/b/space/PgUp/PgDn page, \
-                  g/G/Home/End ends, q/Esc quit."
+                  g/G/Home/End ends, /pattern ?pattern search, n/N next/previous match, \
+                  q/Esc quit."
 )]
 struct Cli {
     /// Markdown file to render.
